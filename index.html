@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>چت‌بات ساده با OpenAI API</title>
+<style>
+  body {
+    font-family: sans-serif;
+    background: #fafafa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+  }
+  .chat-container {
+    width: 400px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    height: 600px;
+  }
+  #chat-box {
+    flex-grow: 1;
+    padding: 10px;
+    overflow-y: auto;
+    border-bottom: 1px solid #ccc;
+  }
+  .input-area {
+    display: flex;
+  }
+  #user-input {
+    flex-grow: 1;
+    padding: 10px;
+    border: none;
+    font-size: 16px;
+  }
+  button {
+    padding: 10px 20px;
+    border: none;
+    background: #3897f0;
+    color: white;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+  <div class="chat-container">
+    <div id="chat-box"></div>
+    <div class="input-area">
+      <input type="text" id="user-input" placeholder="پیام خود را بنویسید..." />
+      <button onclick="sendMessage()">ارسال</button>
+    </div>
+  </div>
+
+<script>
+const apiKey = "sk-e657c7041bdf4be2b7d17605aea0548c";
+
+async function sendMessage() {
+  const input = document.getElementById("user-input");
+  const chatBox = document.getElementById("chat-box");
+  const userMessage = input.value.trim();
+  if (!userMessage) return;
+
+  chatBox.innerHTML += `<div><strong>شما:</strong> ${userMessage}</div>`;
+  input.value = "";
+  chatBox.scrollTop = chatBox.scrollHeight;
+
+  try {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + apiKey,
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: userMessage }]
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("خطا در دریافت پاسخ");
+    }
+
+    const data = await response.json();
+    const botReply = data.choices[0]?.message?.content || "پاسخ نامشخص";
+    chatBox.innerHTML += `<div><strong>چت‌بات:</strong> ${botReply}</div>`;
+    chatBox.scrollTop = chatBox.scrollHeight;
+  } catch (error) {
+    chatBox.innerHTML += `<div><strong>چت‌بات:</strong> خطا در اتصال به سرویس</div>`;
+  }
+}
+</script>
+</body>
+</html>
